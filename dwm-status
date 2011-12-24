@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# this skript should be put into $HOME/.dwm-status
+# or whatever your local dwm is executing...
+# don't forget to configure 
+CHIP=""
+DELAY=5
+max_ram=`expr $(grep MemTotal /proc/meminfo |sed -e 's/[a-zA-Z: ]//g') `;
+
+while true; do
+    cputemp=$(( $((`cat /sys/class/hwmon/hwmon1/device/temp1_input `))/1000));
+#disabled because of massiv output to syslog
+#	gputemp=$(nvclock -T|tail -1| sed -e 's/.*:\ //');
+    fan1=$((`cat /sys/class/hwmon/hwmon1/device/fan1_input `));
+    speed=$(( $((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`)) /1000))
+
+# use the different speedometers for indicating cpu-speed
+    case $speed in 
+	# )
+	#   speedo="[_. ]" ;;
+	# )
+	#   speedo="[-. ]" ;;
+	# )
+	#   speedo="[\. ]" ;;
+	# )
+	#   speedo="[ | ]" ;;
+	# )
+	#   speedo="[ ./]" ;;
+	# )
+	#   speedo="[ .-]" ;;
+	# )
+	#   speedo="[ ._]" ;;
+	* )
+	    speedo="[ * ]" ;;
+    esac
+    
+#	free_ram=`expr $(grep MemFree /proc/meminfo |sed -e 's/[a-zA-Z: ]//g') `;
+    free_ram=$(grep MemFree /proc/meminfo |sed -e 's/[a-zA-Z: ]//g');
+    buff_ram=$(grep Buffers /proc/meminfo |sed -e 's/[a-zA-Z: ]//g');
+    cache_ram=$(grep ^Cache /proc/meminfo |sed -e 's/[a-zA-Z: ]//g');
+    free_perc=$(( $free_ram * 100/ $max_ram ));
+    buff_perc=$(( $buff_ram * 100/ $max_ram )) ; 
+    cache_perc=$(( $cache_ram * 100/ $max_ram )) ;	
+    used_perc=$(( 100 - $free_perc ));
+    xsetroot -name "`date \"+%a %b %e %R\"` | `echo "$speedo"` | `printf "RAM:%2d%%[%2d%%,%2d%%]" $used_perc $buff_perc $cache_perc` | \
+`printf "CPU: %2i°C @%4iRPM" $cputemp $fan1`";
+#CPU:`echo $cputemp` GPU:`echo $gputemp` | Fan: `echo $fan1`";
+    sleep $DELAY
+done
