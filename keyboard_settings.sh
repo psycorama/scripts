@@ -10,10 +10,10 @@
 MODE=$1
 
 if [ -z "$MODE" ]; then
-    if [ -e /tmp/neo ]; then
+    if [ -e /tmp/bone ]; then
 	MODE="us"
     else
-	MODE="neo"
+	MODE="bone"
     fi;
 fi;
 
@@ -26,26 +26,23 @@ xset m 2 30
 
 NEO_PATH=$HOME/scripte/neo
 
-if [ "$MODE" == "neo" ]; then
-    touch /tmp/neo
+if [ "$MODE" == "bone" ]; then
+    touch /tmp/bone
     if [ -n "`xinput --list |grep \"imp tech tasta\"`" ]; then
 	setxkbmap de nodeadkeys
     else
 	setxkbmap lv
-	xmodmap $NEO_PATH/neo_de.xmodmap
+#	xmodmap $NEO_PATH/neo_de.xmodmap
+	xmodmap $NEO_PATH/bone.xmodmap
     fi;
-    xset -r 51
+    xset -r 48
 
-    if [ -z "`pidof neo_layout_viewer`" ]; then
-	#start view helper
-	cd $NEO_PATH/ && ./neo_layout_viewer &
-    fi;
 elif [ "$MODE" == "us" ]; then  
-    if [ -e /tmp/neo ]; then
-	rm /tmp/neo
+    if [ -e /tmp/bone ]; then
+	rm /tmp/bone
     fi;
     setxkbmap us
-    xset r 51
+    xset r 48
     # put Compose-Key on Right-Alt
     xmodmap -e 'keycode 108 = Multi_key'
     
@@ -54,8 +51,4 @@ elif [ "$MODE" == "us" ]; then
     #xmodmap -e 'clear Lock'
     #xmodmap -e 'add Control = Control_L'
 
-elif [ "$MODE" == "off" ]; then
-    if [ -n "`pidof neo_layout_viewer`" ]; then
-	killall neo_layout_viewer;
-    fi;
 fi;
