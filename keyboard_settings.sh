@@ -28,27 +28,22 @@ NEO_PATH=$HOME/scripte/neo
 
 if [ "$MODE" == "bone" ]; then
     touch /tmp/bone
-    if [ -n "`xinput --list |grep \"imp tech tasta\"`" ]; then
-	setxkbmap de nodeadkeys
-    else
-	setxkbmap lv
-#	xmodmap $NEO_PATH/neo_de.xmodmap
-	xmodmap $NEO_PATH/bone.xmodmap
-    fi;
+
+    setxkbmap lv
+    xmodmap $NEO_PATH/bone.xmodmap
     xset -r 48
 
 elif [ "$MODE" == "us" ]; then  
     if [ -e /tmp/bone ]; then
 	rm /tmp/bone
     fi;
-    setxkbmap us
-    xset r 48
-    # put Compose-Key on Right-Alt
-    xmodmap -e 'keycode 108 = Multi_key'
-    
-    #put Control on CapsLock
-    #xmodmap -e 'keycode 66 = Control_L'
-    #xmodmap -e 'clear Lock'
-    #xmodmap -e 'add Control = Control_L'
 
+    if [ -n "`xinput --list |grep \"imp tech tasta\"`" ]; then
+	setxkbmap de nodeadkeys
+    else
+	setxkbmap us
+        # put Compose-Key on Right-Alt
+	xmodmap -e 'keycode 108 = Multi_key'
+    fi
+    xset r 48
 fi;
