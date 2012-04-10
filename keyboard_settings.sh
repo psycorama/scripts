@@ -8,6 +8,7 @@
 #
 # TODO: finish documentation, depends, variables
 MODE=$1
+SERVER=$((`echo DISPLAY|grep -c 2`))
 
 if [ -z "$MODE" ]; then
     if [ -e /tmp/bone ]; then
@@ -27,15 +28,15 @@ xset m 2 30
 NEO_PATH=$HOME/scripte/neo
 
 if [ "$MODE" == "bone" ]; then
-    touch /tmp/bone
+    touch /tmp/bone_$SERVER
 
     setxkbmap lv
     xmodmap $NEO_PATH/bone.xmodmap
     xset -r 48
 
 elif [ "$MODE" == "us" ]; then  
-    if [ -e /tmp/bone ]; then
-	rm /tmp/bone
+    if [ -e /tmp/bone_$SERVER ]; then
+	rm /tmp/bone_$SERVER
     fi;
 
     if [ -n "`xinput --list |grep \"imp tech tasta\"`" ]; then
