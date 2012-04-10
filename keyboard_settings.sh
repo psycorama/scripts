@@ -11,7 +11,7 @@ MODE=$1
 SERVER=$((`echo DISPLAY|grep -c 2`))
 
 if [ -z "$MODE" ]; then
-    if [ -e /tmp/bone ]; then
+    if [ -e /tmp/bone_$SERVER ]; then
 	MODE="us"
     else
 	MODE="bone"
