@@ -8,8 +8,7 @@
 sink=`pacmd info|grep "Default sink name"|awk '{print $4}'`
 
 # get volume
-#volume=`pacmd list-sinks|grep "volume: 0:"|cut -d " " -f 4|sed -e 's/%//'`
-volume=`pacmd list-sinks|grep "volume: 0:"|cut -c 13-15`
+volume=`pacmd list-sinks|grep -A 6 $sink|tail -1|cut -c 13-15`
 
 # calculate new volume (+/- 2%)
 volume=$((volume $1 2 ))
