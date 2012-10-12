@@ -5,6 +5,7 @@ LUSER=andy
 
 if [ $UID -ne 0 ]; then
     echo "this better be ran as root..."
+    exit 0
 fi
 
 DEV=usb0
@@ -26,7 +27,7 @@ while [ $# -gt 0 ]; do
 	    NET=`echo $1|cut -d '.' -f 1-3`
 	    IP=$(($((`echo $1|cut -d '.' -f 4`))-1))
 	    if [ $IP -lt 1 ]; then
-		echo "remote IP should noti be less than .2"
+		echo "remote IP should not be less than .2"
 		exit -1;
 	    fi
 	    L_IP=$NET.$IP
@@ -64,6 +65,10 @@ if [ `sysctl net.ipv4.ip_forward|cut -c 23` -ne 1 ]; then
     sysctl -w net.ipv4.ip_forward=1
 else
     echo "forwarding already active"
+fi
+
+if [ ! -e /home/$LUSER/.ssh/knownOM_$TARGET ]; then
+    su $LUSER -c "touch /home/$LUSER/.ssh/knownOM_$TARGET"
 fi
 
 #copying /etc/resolv.conf, just to be sure...
