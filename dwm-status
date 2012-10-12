@@ -7,34 +7,99 @@ CHIP=""
 DELAY=5
 max_ram=`expr $(grep MemTotal /proc/meminfo |sed -e 's/[a-zA-Z: ]//g') `;
 
-while true; do
-    cputemp=$(( $((`cat /sys/class/hwmon/hwmon1/device/temp1_input `))/1000));
-#disabled because of massiv output to syslog
-#	gputemp=$(nvclock -T|tail -1| sed -e 's/.*:\ //');
-    fan1=$((`cat /sys/class/hwmon/hwmon1/device/fan1_input `));
-    speed=$(( $((`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`)) /1000))
+#
+# battery information will only be read at script startup
+rate=0;
+full=$[ `cat /sys/class/power_supply/BAT0/energy_full` / 1000 ];
+maxfull=$[ `cat /sys/class/power_supply/BAT0/energy_full_design` / 1000 ];
 
-# use the different speedometers for indicating cpu-speed
+#
+# this needs to be configured. check for "hwmon*" and "temp*_input"
+#
+if [ -e /sys/class/hwmon/hwmon1/device/temp0_input ]; then
+    CPUTEMP_LOCATION="/sys/class/hwmon/hwmon1/device/temp0_input"
+elif [ -e /sys/class/thermal/thermal_zone0/temp ]; then
+# old fallback location
+    CPUTEMP_LOCATION="/sys/class/thermal/thermal_zone0/temp"
+fi
+
+#
+# this needs to be configured. check for "hwmon*" and "fan*_input"
+#
+if [ -e /sys/class/hwmon/hwmon1/device/fan1_input ]; then
+    FAN_LOCATION="/sys/class/hwmon/hwmon1/device/fan1_input"
+elif [ -e  /sys/class/thermal/cooling_device0/cur_state ];then
+# old fallback location
+    FAN_LOCATION="/sys/class/thermal/cooling_device0/cur_state"
+fi
+
+# starting to loop
+while true; do
+    cputemp=$(cat $CPUTEMP_LOCATION | cut -c 1-2);
+    fan=`cat $FAN_LOCATION`;
+    # disabled, because of massiv output to syslog
+    #gputemp=$(nvclock -T|tail -1| sed -e 's/.*:\ //');
+
+
+    speed=$[ $[`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`] / 1000 ]
+
+    # use the different speedometers for indicating cpu-speed
+    # check "/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies" for frequencies to track
     case $speed in 
-	# )
-	#   speedo="[_. ]" ;;
+	600 )
+	    speedo="[_. ]" ;;
 	# )
 	#   speedo="[-. ]" ;;
-	# )
-	#   speedo="[\. ]" ;;
-	# )
-	#   speedo="[ | ]" ;;
-	# )
-	#   speedo="[ ./]" ;;
+	800 )
+	    speedo="[\. ]" ;;
+	1000 )
+	    speedo="[ | ]" ;;
+	1200 )
+	    speedo="[ ./]" ;;
 	# )
 	#   speedo="[ .-]" ;;
-	# )
-	#   speedo="[ ._]" ;;
+	1400 )
+	    speedo="[ ._]" ;;
 	* )
 	    speedo="[ * ]" ;;
     esac
-    
-#	free_ram=`expr $(grep MemFree /proc/meminfo |sed -e 's/[a-zA-Z: ]//g') `;
+
+    #
+    # battery/power based information
+    if [ `cat /sys/class/power_supply/AC/online` == "1" ]; then
+	p_icon='+';
+    else
+	p_icon='-';
+    fi;
+
+    if [ -e /sys/class/power_supply/BAT0/present ] ; then
+	bat=$[ `cat /sys/class/power_supply/BAT0/energy_now` / 1000];
+	perc=$[ $bat * 100 / $full ];
+	maxp=$[ $bat * 100 / $maxfull ];
+
+	n_rate=$[ `cat /sys/class/power_supply/BAT0/power_now` / 1000 ];
+	# triple the speed of the pentium
+	rate=$[ $[ ($rate * 3 )+ $n_rate ] / 4 ];
+
+	if [ $rate -ne 0 ]; then
+	    if [ "$p_icon" == "-" ]; then
+		h=$[ $bat / $rate ];
+		m=$[ ($bat *60 / $rate) % 60 ];
+	    else
+		h=$[ ($full - $bat ) / $rate ];
+		m=$[ ( ($full - $bat) * 60 / $rate) % 60 ];
+	    fi;
+	else
+	    h=99; m=59;
+	fi;
+	battery_status=`printf "%2d.%1dW | %3d%%[%3d%%] | %1d:%02d " $[ $rate/1000] $[ $rate%1000/100]  $perc $maxp $h $m` 
+    else
+	rate=0
+	bat=0
+	battery_status=`printf " not present"`
+    fi
+
+    # calculate some stats about RAM usage: "used[ buffered, cached]" (in %)
     free_ram=$(grep MemFree /proc/meminfo |sed -e 's/[a-zA-Z: ]//g');
     buff_ram=$(grep Buffers /proc/meminfo |sed -e 's/[a-zA-Z: ]//g');
     cache_ram=$(grep ^Cache /proc/meminfo |sed -e 's/[a-zA-Z: ]//g');
@@ -42,8 +107,16 @@ while true; do
     buff_perc=$(( $buff_ram * 100/ $max_ram )) ; 
     cache_perc=$(( $cache_ram * 100/ $max_ram )) ;	
     used_perc=$(( 100 - $free_perc ));
-    xsetroot -name "`date \"+%a %b %e %R\"` | `echo "$speedo"` | `printf "RAM:%2d%%[%2d%%,%2d%%]" $used_perc $buff_perc $cache_perc` | \
-`printf "CPU: %2i°C @%4iRPM" $cputemp $fan1`";
-#CPU:`echo $cputemp` GPU:`echo $gputemp` | Fan: `echo $fan1`";
+
+#
+# collection of informations complete, print it to xsetroot
+#
+    xsetroot -name "`date \"+%a %b %e %R\"` | `echo "$speedo"` | \
+`printf "RAM:%2d%%[%2d%%,%2d%%]" $used_perc $buff_perc $cache_perc` | \
+`echo $p_icon$battery_status` | \
+`printf "CPU: %2i°C @%4iRPM" $cputemp $fan`";
+# reserved for later use
+#CPU:`echo $cputemp` GPU:`echo $gputemp` | Fan: `echo $fan`";
+
     sleep $DELAY
 done
