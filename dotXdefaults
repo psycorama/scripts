@@ -1,4 +1,4 @@
- XTerm*eightBitInput:	false
+XTerm*eightBitInput:	false
 XTerm*eightBitOutput:	true
 XTerm*background:	black
 XTerm*foreground:	grey100
@@ -43,7 +43,25 @@ URxvt*iso14755:false
 urxvt*perl-lib:         /usr/lib/urxvt/perl/
 urxvt*perl-ext-common:  default,url-select
 # url-select: https://github.com/muennich/urxvt-perls
-URxvt.keysym.C-u: perl:url-select:select_next
+URxvt.keysym.C-F: perl:url-select:select_next
 URxvt.url-select.launcher: /usr/bin/conkeror
 URxvt.url-select.button: 1
 URxvt.url-select.underline: true
+
+# enable keypad geraffel
+URxvt.keysym.KP_Add:	+
+URxvt.keysym.KP_Subtract: -
+URxvt.keysym.KP_Multiply: *
+URxvt.keysym.KP_Divide:   /
+URxvt.keysym.KP_Decimal:  .
+URxvt.keysym.KP_Separator: ,
+URxvt.keysym.KP_1:	1
+URxvt.keysym.KP_2:	2
+URxvt.keysym.KP_3:	3
+URxvt.keysym.KP_4:	4
+URxvt.keysym.KP_5:	5
+URxvt.keysym.KP_6:	6
+URxvt.keysym.KP_7:	7
+URxvt.keysym.KP_8:	8
+URxvt.keysym.KP_9:	9
+URxvt.keysym.KP_0:	0
