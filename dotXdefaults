@@ -56,12 +56,23 @@ URxvt.keysym.KP_Divide:   /
 URxvt.keysym.KP_Decimal:  .
 URxvt.keysym.KP_Separator: ,
 URxvt.keysym.KP_1:	1
+URxvt.keysym.M-KP_1:	\0331
 URxvt.keysym.KP_2:	2
+URxvt.keysym.M-KP_2:	\0332
 URxvt.keysym.KP_3:	3
+URxvt.keysym.M-KP_3:	\0333
 URxvt.keysym.KP_4:	4
+URxvt.keysym.M-KP_4:	\0334
 URxvt.keysym.KP_5:	5
+URxvt.keysym.M-KP_5:	\0335
 URxvt.keysym.KP_6:	6
+URxvt.keysym.M-KP_6:	\0336
 URxvt.keysym.KP_7:	7
+URxvt.keysym.M-KP_7:	\0337
 URxvt.keysym.KP_8:	8
+URxvt.keysym.M-KP_8:	\0338
 URxvt.keysym.KP_9:	9
+URxvt.keysym.M-KP_9:	\0339
 URxvt.keysym.KP_0:	0
+URxvt.keysym.M-KP_0:	\0330
+
