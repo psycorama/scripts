@@ -1,6 +1,9 @@
 #!/bin/bash
 # following the official API this was created
 # https://www.twodns.de/en/api
+#
+# 2014 (c) by Andreas Geisenhainer <psycorama@opensecure.de>
+# Licensed under GNU GPL v3
 
 # you'll need curl for this
 if [ ! -e /usr/bin/curl ]; then
