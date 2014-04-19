@@ -1,0 +1,10 @@
+# ~/twodns.rc
+
+# username to log into twodns.de
+USER=""
+
+# API auth token
+API_TOKEN=""
+
+# fqdn to update
+FQDN=""
