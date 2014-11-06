@@ -13,13 +13,14 @@ fi
 
 print_help() {
 cat <<EOF
-Usage: {$##*/} [-ug]
+Usage: {$##*/} [-ugG]
 Update or get information from TwoDNS regarding DSL Information.
 
-   -u	update IP
+   -u	update IP (default)
    -g	get info
+   -G	get info on all hosts
    -v	enable verbose mode for curl
-   -s	enable silent mode for curl
+   -s	enable silent mode for curl (default)
    -h	print help
 EOF
 }
@@ -44,7 +45,7 @@ VERBOSITY='-s'
 # reset/clear getops
 OPTIND=1
 
-while getopts "hugvs" opt; do
+while getopts "hugGvs" opt; do
     case "$opt" in
 	h)
 	    print_help
@@ -55,6 +56,9 @@ while getopts "hugvs" opt; do
 	    ;;
 	g)
 	    MODE="get"
+	    ;;
+	G) 
+	    MODE="getall"
 	    ;;
 	v)
 	    VERBOSITY="-v"
@@ -76,10 +80,17 @@ case "$MODE" in
     "update")
 	curl $VERBOSITY -X PUT -u "$USER:$API_TOKEN" \
 	    -d '{"ip_address": "auto", "ttl": "300"}' \
-	    https://api.twodns.de/hosts/$FQDN
+	    https://api.twodns.de/hosts/all
+	echo ""
 	;;
     "get")
 	curl $VERBOSITY -X GET -u "$USER:$API_TOKEN" \
 	    https://api.twodns.de/hosts/$FQDN
+	echo ""
+	;;
+    "getall")
+	curl $VERBOSITY -X GET -u "$USER:$API_TOKEN" \
+	    https://api.twodns.de/hosts
+	echo ""
 	;;
 esac
