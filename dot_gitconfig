@@ -1,0 +1,18 @@
+[user]
+	name = User_Name
+	email = user_email
+[color]
+	branch = auto
+	diff = auto
+	interactive = auto
+	status = auto
+[core]
+	editor = emacs
+	excludesfile = $HOME/.gitignore
+[alias]
+	st = status
+	ba = branch -a
+	logg = log --graph
+	tableflip = "!sh -c \"rm -rf .*; rm -rf * ; cd .. ; git clone $(git config --get remote.origin.url)\""
+[push]
+	default = matching
