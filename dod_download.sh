@@ -20,7 +20,7 @@ if [ ! -d $LDIR ]; then
 fi
 cd "$LDIR/"
 
-FILES=$(lynx --dump $DL_BASE|cut -c 7- |grep ^http| grep mp3)
+FILES=$(lynx --dump $DL_BASE|cut -c 7- |grep '^http://www'| grep mp3)
 IFS='
 '
 for i in $FILES; do
