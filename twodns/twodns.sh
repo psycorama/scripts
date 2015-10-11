@@ -9,7 +9,7 @@
 if [ ! -e /usr/bin/curl ]; then
     echo "curl not found"
     exit 2;
-fi 
+fi
 
 print_help() {
 cat <<EOF
@@ -21,6 +21,7 @@ Update or get information from TwoDNS regarding DSL Information.
    -G	get info on all hosts
    -v	enable verbose mode for curl
    -s	enable silent mode for curl (default)
+   -l   enable update of local file
    -h	print help
 EOF
 }
@@ -41,11 +42,13 @@ source ~/.twodns.rc
 #
 MODE='update'
 VERBOSITY='-s'
-
+LOCAL_FILE='/tmp/online'
+UPDATE_LOCAL=0
+OLD_IP=""
 # reset/clear getops
 OPTIND=1
 
-while getopts "hugGvs" opt; do
+while getopts "hugGvsl" opt; do
     case "$opt" in
 	h)
 	    print_help
@@ -57,7 +60,7 @@ while getopts "hugGvs" opt; do
 	g)
 	    MODE="get"
 	    ;;
-	G) 
+	G)
 	    MODE="getall"
 	    ;;
 	v)
@@ -65,6 +68,9 @@ while getopts "hugGvs" opt; do
 	    ;;
 	s)
 	    VERBOSITY="-s"
+	    ;;
+	l)
+	    UPDATE_LOCAL=1
 	    ;;
 	'?')
 	    print_help >&2
@@ -74,14 +80,29 @@ while getopts "hugGvs" opt; do
 done
 shift "$((OPTIND-1))" # Shift off the options and optional --.
 
-# 
-case "$MODE" in 
+#
+case "$MODE" in
 
     "update")
-	curl $VERBOSITY -X PUT -u "$USER:$API_TOKEN" \
-	    -d '{"ip_address": "auto", "ttl": "300"}' \
-	    https://api.twodns.de/hosts/all
-	echo ""
+	if [ -r $LOCAL_FILE ]; then
+	    OLD_IP=$(cat $LOCAL_FILE)
+	fi
+	RET=$( curl $VERBOSITY -X PUT -u "$USER:$API_TOKEN" \
+		-d '{"ip_address": "auto", "ttl": "300"}' \
+		https://api.twodns.de/hosts/all )
+
+	if [ $UPDATE_LOCAL -eq 1 ]; then
+	    for field in $(echo $RET|tr "," "\n"| sed -e 's/"//g' ); do
+		if [ "$(echo $field| cut -d ":" -f 1)" == "ip_address" ]; then
+		    #printf "%s : %s\n" $( echo $i| cut -d ":" -f 1 )
+		    NEW_IP="$(echo $field| cut -d ':' -f 2)"
+		    if [ $OLD_IP != $NEW_IP ]; then
+			echo $NEW_IP > /tmp/online
+			break
+		    fi
+		fi
+	    done
+	fi
 	;;
     "get")
 	curl $VERBOSITY -X GET -u "$USER:$API_TOKEN" \
