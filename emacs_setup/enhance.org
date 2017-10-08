@@ -1,0 +1,210 @@
+# setup for the workshop:  emacs as an development environment
+
+* Emacs as development environment
+** TODO write intro
+** general helpfull pointer
+   - the emacs wiki is a good first step for information regarding emacs
+     https://www.emacswiki.org/
+
+* dot-emacs Config - part 1 [2/3]
+  generic Config elements no depending on external sources
+** DONE easy, build-in, stuff to enable [9/9]
+*** DONE some coloring
+    #+BEGIN_SRC elisp
+    ;; ===== enable colors ====
+    (global-font-lock-mode t)
+    #+END_SRC
+*** DONE workshop hilight
+   #+BEGIN_SRC elisp
+   ;; ===== hilight one line ======
+   (global-hl-line-mode 1)
+   ;; To customize the background color
+   ;;(set-face-background 'hl-line "#330")
+   (set-face-background 'hl-line "#099")
+   ;;enable parent hilighting
+   (show-paren-mode 1)
+   #+END_SRC
+*** DONE line by line scrolling
+   #+BEGIN_SRC elisp
+   ;; ====== Line by line scrolling =====
+   (setq scroll-step 1)
+   #+END_SRC
+*** DONE linum-mode
+   #+BEGIN_SRC elisp
+   ;; ===== enable line numbering with custom format end charakter "│" =====
+   (global-linum-mode 1)
+   (setq linum-format "%4d\u2502")
+   ;; Show line- and column-number in the mode line
+   (line-number-mode 1)
+   (column-number-mode 1)
+   #+END_SRC
+*** DONE enhance load-path
+    #+BEGIN_SRC elisp
+    ;;changing load-path
+    (add-to-list 'load-path "~/.emacs.d/load.this/")
+    #+END_SRC
+*** DONE window manipulation bindings
+   #+BEGIN_SRC elisp
+   ;; enable shift+arrow for active window changing
+   (when (fboundp 'windmove-default-keybindings)
+   (windmove-default-keybindings))
+
+   ;; move it -- flaky …
+   (global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+   (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+   (global-set-key (kbd "S-C-<down>") 'shrink-window)
+   (global-set-key (kbd "S-C-<up>") 'enlarge-window)
+   #+END_SRC
+*** DONE comformt zone
+    #+BEGIN_SRC elisp
+    ;; shorten yes/no to y/n
+    (fset 'yes-or-no-p 'y-or-n-p)
+    #+END_SRC
+*** DONE verpeil helper
+    #+BEGIN_SRC elisp
+    ;; ===== saving my bacon since 2007 =====
+    (defun ask-before-closing ()
+      "Ask whether or not to close, and then close if y was pressed"
+      (interactive)
+      (if (y-or-n-p (format "Are you sure you want to exit Emacs? "))
+        (if (< emacs-major-version 22)
+	      (save-buffers-kill-terminal)
+	    (save-buffers-kill-emacs))
+        (message "Canceled exit"))
+    )
+    (global-set-key (kbd "C-x C-c") 'ask-before-closing)
+    #+END_SRC
+*** DONE org-mode
+    - since v22.1 included as default
+    - reeanable usage of windmove bindings
+    #+BEGIN_SRC elisp
+    ;; Make windmove work in org-mode:
+    (add-hook 'org-shiftup-final-hook 'windmove-up)
+    (add-hook 'org-shiftleft-final-hook 'windmove-left)
+    (add-hook 'org-shiftdown-final-hook 'windmove-down)
+    (add-hook 'org-shiftright-final-hook 'windmove-right)
+    #+END_SRC
+
+** DONE server-mode [2/2]
+   create command to spawn buffer with content within running emacs instance
+*** DONE enabling
+    #+BEGIN_SRC elisp
+    (load "server")
+    (unless (server-running-p) (server-start))
+    #+END_SRC
+*** DONE externel helper
+    #+BEGIN_SRC elisp
+    #!/bin/sh
+    exec emacsclient --alternate-editor="" -n "$@"
+    #+END_SRC
+
+
+** TODO expand
+
+* Tools to install [5/6]
+** DONE melpa repository
+   - as stated here: https://melpa.org/#/getting-started
+   #+BEGIN_SRC elisp
+   ;; ===== using stable packages =====
+   (require 'package)
+   (add-to-list 'package-archives
+   '("melpa-stable" . "https://stable.melpa.org/packages/"))
+   ;; ===== using newer packages =====
+   (require 'package)
+   (add-to-list 'package-archives
+   '("melpa" . "https://melpa.org/packages/"))
+   #+END_SRC
+   - restart
+** DONE cedet
+   default installed since emacs23.x
+** DONE ecb
+*** custom install via source
+ - clone git and configure: https://github.com/ecb-home/ecb
+   partly configured by setting custom variables
+   #+BEGIN_SRC elisp
+   (add-to-list 'load-path (expand-file-name
+       "~/.emacs.d/repos/ecb/"))
+   (require 'ecb)
+   #+END_SRC
+*** via melpa
+   - melpa seems to contain the same version
+   #+BEGIN_SRC elisp
+   (require 'ecb)
+   #+END_SRC
+*** setup
+    - setting up the most basic elements
+    "> M-x ecb-customize-most-important"
+    - setting width of ecb windows
+    "> M-x ecb-customize"
+      - search for width
+      - edit "Ecb Window Width"
+      - values <1 are fractions of the whole screen
+      - values >=1 is size in characters
+
+** DONE magit
+   install via Melpa, and activace this as stated in magit config
+   #+BEGIN_SRC elisp
+   (global-set-key (kbd "C-x g") 'magit-status)
+   #+END_SRC
+** DONE theming stuff
+*** choose pre-installed theme
+    - test themes in
+      "> M-x customize-themes"
+      - this will create/expand "custom-set-variables" definitions
+        in ~/.emacs
+    - customize to your hearts content
+      - remove
+        #+BEGIN_SRC elisp
+        (set-face-background 'hl-line "#099")
+        #+END_SRC
+      - "> M-x customize-faces" search 'Hl Line face'
+      - modify other parts as necessary
+
+*** more themes
+   - choose theme ( from e.g. https://emacsthemes.com )
+   - install theme ( preferably via melpa )
+   - enable in config see, above
+
+
+** TODO dependencies
+
+* dot-emacs Config - part two [1/1]
+  expand config to utilize cedet, ecb, org-mode, and magit
+** DONE TAGS
+   - set alias for emacs tags, in ~/.${SHELL}rc
+     #+BEGIN_SRC bash
+     alias tagit='find ./ \( -name \*.c -or -name \*.h -or -name \*.cpp \) -exec etags {} +'
+     #+END_SRC
+   - run in base dir of source to get TAGS file
+   - using [ M-. ] on label within source will jump do implementation/definition: ```xref-find-definitions```
+   - use [ M-, ] to jump back: ```xref-pop-marker-stack```
+
+** extended pointer
+*** Coding Guidelines stuff [2/2]
+**** DONE indentation setup
+     #+BEGIN_SRC elisp
+     ;; make spaces not war^Wtabs
+     (setq-default indent-tabs-mode nil)
+     (setq-default tab-width 4)
+     (setq-default c-basic-indent 4)
+     (defvaralias 'c-basic-offset 'tab-width)
+     (defvaralias 'cperl-indent-level 'tab-width)
+
+     (setq c-indent-level 4)
+     (setq lua-indent-level 4)
+     #+END_SRC
+
+     #+BEGIN_SRC elisp
+     ;;; Directory Local Variables
+     ;;; For more information see (info "(emacs) Directory Variables")
+
+     (nil
+     (c-mode
+     (indent-tabs-mode . true)
+     (tab-width . 4)))
+     #+END_SRC
+
+**** DONE whitespace chaos
+     #+BEGIN_SRC elisp
+     (add-hook 'before-save-hook 'delete-trailing-whitespace)
+     #+END_SRC
