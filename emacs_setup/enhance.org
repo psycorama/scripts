@@ -6,24 +6,28 @@
    - the emacs wiki is a good first step for information regarding emacs
      https://www.emacswiki.org/
 
-* dot-emacs Config - part 1 [2/3]
+* dot-emacs Config - part one [2/3]
   generic Config elements no depending on external sources
-** DONE easy, build-in, stuff to enable [9/9]
+** DONE easy, build-in, stuff to enable [10/10]
 *** DONE some coloring
+    it is enabled by default, but has always had a place in my setup
+
     #+BEGIN_SRC elisp
-    ;; ===== enable colors ====
+    ;; ===== enable colors =====
     (global-font-lock-mode t)
     #+END_SRC
+
+    see: https://www.gnu.org/software/emacs/manual/html_node/emacs/Font-Lock.html
+
 *** DONE workshop hilight
-   #+BEGIN_SRC elisp
-   ;; ===== hilight one line ======
-   (global-hl-line-mode 1)
-   ;; To customize the background color
-   ;;(set-face-background 'hl-line "#330")
-   (set-face-background 'hl-line "#099")
-   ;;enable parent hilighting
-   (show-paren-mode 1)
-   #+END_SRC
+
+    #+BEGIN_SRC elisp
+    ;; ===== hilight one line ======
+    (global-hl-line-mode 1)
+    ;; To customize the background color
+    ;;(set-face-background 'hl-line "#330")
+    (set-face-background 'hl-line "#099")
+    #+END_SRC
 *** DONE line by line scrolling
    #+BEGIN_SRC elisp
    ;; ====== Line by line scrolling =====
@@ -99,8 +103,6 @@
     #+END_SRC
 
 
-** TODO expand
-
 * Tools to install [5/6]
 ** DONE melpa repository
    - as stated here: https://melpa.org/#/getting-started
@@ -166,7 +168,6 @@
    - enable in config see, above
 
 
-** TODO dependencies
 
 * dot-emacs Config - part two [1/1]
   expand config to utilize cedet, ecb, org-mode, and magit
