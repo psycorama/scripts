@@ -28,6 +28,12 @@
     ;;(set-face-background 'hl-line "#330")
     (set-face-background 'hl-line "#099")
     #+END_SRC
+*** DONE parent spotting
+
+    #+BEGIN_SRC elisp
+    ;;enable parenthesis hilighting
+    (show-paren-mode 1)
+    #+END_SRC
 *** DONE line by line scrolling
    #+BEGIN_SRC elisp
    ;; ====== Line by line scrolling =====
