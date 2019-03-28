@@ -1,0 +1,157 @@
+#!/bin/bash
+#
+set -e
+
+# TODO:
+#
+# * setup tinc, if necessary
+
+if [ $(id -u) -ne 0 ]; then
+    printf "be root or be sorry\n"
+    exit 1
+fi
+
+DEV=wlan0
+CONFIG_FILE=/etc/wpa_supplicant.conf
+DHCP_TOOL=/sbin/dhcpcd
+WPA_TOOL=/sbin/wpa_supplicant
+MODE=""
+IP_REFRESH=0
+DHCP_KILL=0
+
+print_usage() {
+    printf "\n${0}: script for easy setup for WLAN\n\n"
+    printf "\n${0} <-m MODE> <-krdh>"
+    printf "parameters:\n"
+    printf "  -m <MODE>     available modes are: start, stop, restart, status\n"
+    printf "  -k            kill dhcp-tool\n"
+    printf "  -r            refresh IP (or get a new one) with ${DHCPTOOL}\n"
+    printf "  -d            specify device (default: wlan0)\n"
+    printf "  -h            print this help\n\n"
+}
+
+kill_dhcp() {
+    DHCP_PID=$(pidof $DHCP_TOOL || echo "")
+    if [ -n "$DHCP_PID" ]; then
+        kill $DHCP_PID
+        sleep 1
+        DHCP_PID=$(pidof $DHCP_TOOL || echo "")
+        if [ -z $DHCP_PID ]; then
+            printf "tried to kill $DHCP_TOOL with pid $DHCP_PID: it's still running\n "
+        else
+            printf "killed $DHCP_TOOL with pid $DHCP_PID\n "
+        fi
+    else
+        printf "no $DhCP_TOOL running. none kiled\n"
+    fi
+}
+
+refresh_IP() {
+    if [ -n "$(pidof $DHCP_TOOL)" ]; then
+        printf "$DHCP_TOOL still running, killing it\n"
+        kill_dhcp
+    fi
+
+    if [ -z "$(pidof $WPA_TOOL)" -a \
+         "$DEV" == "wlan0" ]; then
+        printf "$WPA_TOOL not running, probably not connected to anything.\n"
+        exit 
+    fi
+    
+    $DHCP_TOOL $DEV
+    LIP=$(/bin/ip addr show dev $DEV |grep "inet "|cut -d ' ' -f 6)
+    LROUTER=$(ip r | grep default|cut -d ' ' -f 3)
+    printf "got %s. routing via %s\n" $LIP $LROUTER
+}
+
+wlan_start() {
+    # todo: check dev status
+    WSUP_PID=$(/bin/pidof /sbin/wpa_supplicant || echo "")
+    if [ -z "$WSUP_PID" ]; then
+        /sbin/ip link set $DEV up
+        /sbin/wpa_supplicant -i${DEV} -c${CONFIG_FILE} 2>&1 > /dev/null &
+        printf "started wpa_supplicant im detached mode\n"
+        sleep 2
+        refresh_IP
+    else
+        printf "wpa_supplicant already running.\n"
+    fi
+}
+
+wlan_stop() {
+
+    kill_dhcp
+    WSUP_PID=$(pidof /sbin/wpa_supplicant || echo "")
+    if [ -n "$WSUP_PID" ]; then
+        kill $WSUP_PID
+        printf "killed wpa_supplicant\n"
+    else
+        printf "wpa_supplicant not running\n"
+    fi
+    /sbin/ip link set $DEV down
+}
+
+wlan_restart() {
+    wlan_stop
+    wlan_start
+}
+
+wlan_status() {
+    LIP=$(/bin/ip addr show dev $DEV |grep "inet "|cut -d ' ' -f 6)
+    LROUTER=$(ip r | grep default|cut -d ' ' -f 3)
+
+    # TODO: implement status output
+    #printf "\nconnected on:\n"
+    printf "interface: %s\n" ${DEV}
+    for i in ${LIP}; do
+        printf "IP       : %s\n" ${i}
+    done
+    printf "router   : %s\n" ${LROUTER}
+    #    printf "\n"    
+}
+
+### int main (){}; ###
+while getopts "m:krdh" opt; do
+    case $opt in
+        m)
+            if [ "$OPTARG" == "start" -o \
+                 "$OPTARG" == "stop" -o \
+                 "$OPTARG" == "restart" -o \
+                 "$OPTARG" == "status" ]; then
+                MODE=$OPTARG
+            fi
+            ;;
+        k)
+            DHCP_KILL=1
+            ;;
+        r)
+            IP_REFRESH=1
+            ;;
+        d)
+            DEV=$OPTARG
+            ;;
+        h|*)
+            print_usage
+            exit 0
+            ;;
+    esac
+done
+
+if [ $IP_REFRESH -eq 1 ]; then
+    refresh_IP
+    exit 0
+fi
+if [ $DHCP_KILL -eq 1 ]; then
+    kill_dhcp
+    exit 0
+fi
+
+if [ "$MODE" == "start" ]; then
+    wlan_start
+elif [ "$MODE" == "stop" ]; then
+    wlan_stop
+elif [ "$MODE" == "restart" ]; then
+    wlan_restart
+elif [ "$MODE" == "status" ]; then
+    wlan_status
+fi
