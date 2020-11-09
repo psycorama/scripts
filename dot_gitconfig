@@ -12,7 +12,8 @@
 [alias]
 	st = status
 	ba = branch -a
-	logg = log --graph
+	logg = log --graph --branches --all --decorate=full
+	logge = log --color --graph --all --pretty='format:%C(auto)%d%C(reset) %C(yellow)%h%C(reset) %ar %C(green)%aN%C(reset) %s'
 	tableflip = "!sh -c \"rm -rf .*; rm -rf * ; cd .. ; git clone $(git config --get remote.origin.url)\""
 [push]
 	default = matching
