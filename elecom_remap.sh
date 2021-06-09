@@ -31,6 +31,12 @@ fi
 # remap Fn1 to left and Fn2 to middle click (10->1, 11->2)
 #xinput set-button-map "${MOUSE_DEV_ID}" 1 2 3 4 5 6 7 8 9 1 2 12
 
+# remap map:
+# Fn1/Fn2 -> forward/backward
+# right click -> left click
+# Fn3 -> right click,
+# forward -> middle-click
+# backward -> btn_12
 xinput set-button-map "${MOUSE_DEV_ID}" 1 2 1 4 5 6 7 12 2 9 8 3
 
 # enable scrolling by pressing btn_forward(9) and moving the ball
