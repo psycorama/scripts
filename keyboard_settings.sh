@@ -1,50 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # simple script for switching between 2 keyboard
 # layouts. useful for training purposes.
+# or to call whenever your system has some hickups
+# and resets your usb devices ...
 #
-# Copyright 2012 GPL psycorama@opensecure.de
+# Copyright 2012+ BSD-2-Clause psycorama@datenhalde.de
 #
 #
-# TODO: finish documentation, depends, variables
-MODE=$1
-SERVER=$((`echo DISPLAY|grep -c 2`))
+MODE=${1}
+SERVER=$(echo ${DISPLAY}|grep -c 2)
 
-if [ -z "$MODE" ]; then
-    if [ -e /tmp/bone_$SERVER ]; then
-	MODE="us"
+if [ -z "${MODE}" ]; then
+    if [ -e "/tmp/bone_${SERVER}" ]; then
+        MODE="us"
     else
-	MODE="bone"
+        MODE="bone"
     fi;
 fi;
 
 #disables bell
 xset -b
-#sets keyboard to 250ms timeout 30chars/s
-xset r rate 250 30
-#sets mouse to acceleration 2 with 30 timeout
-xset m 2 30
+#sets keyboard timout(ms) and repeat-rate(/s)
+xset r rate 200 35
+# set the mouse-options (speed, button remap)
+"${HOME}/scripte/elecom_remap.sh"
 
-NEO_PATH=$HOME/scripte/neo
+NEO_PATH="${HOME}/scripte/neo"
 
-if [ "$MODE" == "bone" ]; then
-    touch /tmp/bone_$SERVER
+if xinput --list |grep -q "imp tech tasta" ; then
+    setxkbmap de nodeadkeys
+
+elif [ "${MODE}" == "bone" ]; then
+    touch "/tmp/bone_${SERVER}"
 
     setxkbmap lv
-    xmodmap $NEO_PATH/bone.xmodmap
-    xset -r 48
-
-elif [ "$MODE" == "us" ]; then  
-    if [ -e /tmp/bone_$SERVER ]; then
-	rm /tmp/bone_$SERVER
-    fi;
-
-    if [ -n "`xinput --list |grep \"imp tech tasta\"`" ]; then
-	setxkbmap de nodeadkeys
-    else
-	setxkbmap us
-        # put Compose-Key on Right-Alt
-	xmodmap -e 'keycode 108 = Multi_key'
+    xmodmap "${NEO_PATH}/bone.xmodmap"
+    # disable key auto-repeat, when using Right-Alt as compose
+    # xset -r 48
+elif [ "${MODE}" == "us" ]; then
+    if [ -e "/tmp/bone_${SERVER}" ]; then
+        rm "/tmp/bone_${SERVER}"
     fi
-    xset r 48
-fi;
+
+    setxkbmap us
+    # put Compose-Key on Right-Alt
+    # xmodmap -e 'keycode 108 = Multi_key'
+    # enable key auto-repeat
+    # xset r 48
+fi
