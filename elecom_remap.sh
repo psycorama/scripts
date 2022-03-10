@@ -51,3 +51,26 @@ else
     #xinput set-prop "${MOUSE_DEV_ID}" "Coordinate Transformation Matrix" 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5
 fi
 
+# more standard thumb operated TrackBall Elecom EX-G
+MOUSE_NAME="ELECOM ELECOM TrackBall Mouse"
+MOUSE_TYPE="pointer"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+
+if [ -z "${MOUSE_DEV_ID}" ]; then
+    echo "unable to find ID for EX-G in xinput. skipping"
+else
+    ### ELECOM EX-G button map ###
+    # 1/2/3 left/middle/right click
+    # 4/5/6/7 mouse wheel up/down/left/right
+    # 8/9 backward/forward
+    # 10 button right of right click
+
+    # reduce pointer speed
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
+
+    # enable scrolling by pressing extra_button(10) and moving the ball
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Scroll Method Enabled"   0, 0, 1
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Button Scrolling Button" 10
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Natural Scrolling Enabled" ${NATURAL_SCROLL}
+fi
+
