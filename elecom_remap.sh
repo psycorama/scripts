@@ -74,3 +74,13 @@ else
     xinput set-prop "${MOUSE_DEV_ID}" "libinput Natural Scrolling Enabled" ${NATURAL_SCROLL}
 fi
 
+# hijack for TPPS/2 IBM TrackPoint
+MOUSE_NAME="TPPS/2 IBM TrackPoint"
+MOUSE_TYPE="pointer"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+
+if [ -z "${MOUSE_DEV_ID}" ]; then
+    echo "unable to find ID for EX-G in xinput. skipping"
+else
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
+fi
