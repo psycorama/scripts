@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # change volume for pulseaudio via shortcuts
 #
