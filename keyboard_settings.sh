@@ -28,10 +28,15 @@ xset r rate 200 35
 
 NEO_PATH="${HOME}/scripte/neo"
 
-if xinput --list |grep -q "imp tech tasta" ; then
+if xinput --list | grep -q -e "imp tech tasta" -e "psycorama Alya"; then
+    if [ -e "/tmp/bone_${SERVER}" ]; then
+        rm "/tmp/bone_${SERVER}"
+    fi
+
     setxkbmap de nodeadkeys
 
 elif [ "${MODE}" == "bone" ]; then
+
     touch "/tmp/bone_${SERVER}"
 
     setxkbmap lv
