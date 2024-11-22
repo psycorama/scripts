@@ -18,6 +18,7 @@ MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d
 if [ -z "${MOUSE_DEV_ID}" ]; then
     echo "unable to find ID for HUGE in xinput. skipping"
 else
+    echo "found ID for ${MOUSE_NAME} in xinput. setting up"
     ###  ELECOM Huge button map ###
     # 1 left click
     # 2 middle click
@@ -59,6 +60,7 @@ MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d
 if [ -z "${MOUSE_DEV_ID}" ]; then
     echo "unable to find ID for EX-G in xinput. skipping"
 else
+    echo "found ID for ${MOUSE_NAME} in xinput. setting up"
     ### ELECOM EX-G button map ###
     # 1/2/3 left/middle/right click
     # 4/5/6/7 mouse wheel up/down/left/right
@@ -80,7 +82,17 @@ MOUSE_TYPE="pointer"
 MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
 
 if [ -z "${MOUSE_DEV_ID}" ]; then
-    echo "unable to find ID for EX-G in xinput. skipping"
+    MOUSE_NAME="TPPS/2 Elan TrackPoint"
+
+    echo -n "unable to find ID for TTPS/2 IBM TrackPoint in xinput. trying: ${MOUSE_NAME}"
+    MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+
+    if [ -z "${MOUSE_DEV_ID}" ]; then
+        echo "unable to find ID for TTPS/2 IBM TrackPoint in xinput. skipping"
+    else
+        echo " success."
+        xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
+    fi
 else
     xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
 fi
