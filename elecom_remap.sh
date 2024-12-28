@@ -10,10 +10,11 @@ if [ -n "${1}" ] && [ "${1}" = "-n" ]; then
     NATURAL_SCROLL=1
 fi
 
-MOUSE_NAME="ELECOM TrackBall Mouse HUGE TrackBall"
+# overwrite as needed. until now, always "pointer"
 MOUSE_TYPE="pointer"
 
-MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+MOUSE_NAME="ELECOM TrackBall Mouse HUGE TrackBall"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2| sed -e s/\\t//)
 
 if [ -z "${MOUSE_DEV_ID}" ]; then
     echo "unable to find ID for HUGE in xinput. skipping"
@@ -54,9 +55,7 @@ fi
 
 # more standard thumb operated TrackBall Elecom EX-G
 MOUSE_NAME="ELECOM ELECOM TrackBall Mouse"
-MOUSE_TYPE="pointer"
 MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
-
 if [ -z "${MOUSE_DEV_ID}" ]; then
     echo "unable to find ID for EX-G in xinput. skipping"
 else
@@ -76,23 +75,45 @@ else
     xinput set-prop "${MOUSE_DEV_ID}" "libinput Natural Scrolling Enabled" ${NATURAL_SCROLL}
 fi
 
-# hijack for TPPS/2 IBM TrackPoint
-MOUSE_NAME="TPPS/2 IBM TrackPoint"
-MOUSE_TYPE="pointer"
+#
+MOUSE_NAME="Logitech G502 HERO Gaming Mouse"
 MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
 
 if [ -z "${MOUSE_DEV_ID}" ]; then
-    MOUSE_NAME="TPPS/2 Elan TrackPoint"
-
-    echo -n "unable to find ID for TTPS/2 IBM TrackPoint in xinput. trying: ${MOUSE_NAME}"
-    MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
-
-    if [ -z "${MOUSE_DEV_ID}" ]; then
-        echo "unable to find ID for TTPS/2 IBM TrackPoint in xinput. skipping"
-    else
-        echo " success."
-        xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
-    fi
+    echo "unable to find ID for G502 HERO xinput. skipping"
 else
-    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
+    echo "ID for ${MOUSE_NAME} in xinput. setting up"
+    # reduce pointer speed
+    for DEV_ID in ${MOUSE_DEV_ID}; do
+        #xinput set-prop "${DEV_ID}" "libinput Accel Speed" -0.6
+        xinput set-prop "${DEV_ID}" "Device Accel Velocity Scaling" 10.0
+    done
+fi
+
+# hijack for TPPS/2 Elan TrackPoint
+MOUSE_NAME="TPPS/2 Elan TrackPoint"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+
+if [ -z "${MOUSE_DEV_ID}" ]; then
+    echo "unable to find ID for ${MOUSE_NAME} in xinput. skipping"
+else
+    echo "setting up ${MOUSE_NAME}:"
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -0.6
+    echo "    changed Accel Speed to -0.6"
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Middle Emulation Enabled" 0
+fi
+
+# disable touchpad and touchscreen
+MOUSE_NAME="SynPS/2 Synaptics TouchPad"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+if [ -n "${MOUSE_DEV_ID}" ]; then
+    echo "disabling ${MOUSE_NAME}."
+    xinput disable ${MOUSE_DEV_ID}
+fi
+
+MOUSE_NAME="ELAN Touchscreen"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+if [ -n "${MOUSE_DEV_ID}" ]; then
+    echo "disabling ${MOUSE_NAME}."
+    xinput disable ${MOUSE_DEV_ID}
 fi
