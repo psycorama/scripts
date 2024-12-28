@@ -6,85 +6,37 @@
 # generic hints
 # xvattr -a XV_CRTC -v {-1,0,1}
 #
-CHOOSE=$( zenity --list --column SHORT --column LONG --text "choose display settings" \
-LVDS      "only internal" \
-home_basis "@home [1600x1200]" \
-home_above "@home [ 1600x1200] above" \
-VGA       "only VGA" \
-CLONEVGA  "clone internal + VGA" \
-VGA_SXGA  "Vga mit 1280_1024 above LVDS" \
-VGA_above "VGA ueber LVDS" \
-VGA_right "VGA rechts von LVDS" \
-VGA_left  "VGA links von LVDS" \
-VGA_below "VGA unter LVDS" \
-VGA_XGA   "VGA auf 1024x768 and clone" \
-VGA_SVGA  "VGA auf 800x600 and clone" \
-VGA_VGA   "VGA auf 640x480 and clone" \
-VGA_UXGA  "VGA auf 1600x1200 and Clone" \
+
+CHOOSE=$( yad --list --column SHORT --column LONG --text "choose display settings" \
+              internal      "only internal" \
+              wozi_dual     "@Wohnzimmer [internal]+[1440pUW]" \
+              wozi_tripple  "@Wohnzimmer [internal]+[1440pUW]+[1440p]" \
+              wozi_dual_right "@Wohnzimmer [1440pUW]+[1440p]" \
+              wozi_single   "@Wohnzimmer only [1440pUW]" \
+              lager_tripple "@Arbyteslager [internal+[1440p]+[1440p]" \
+              lager_double  "@Arbyteslager [internal+[1440p]" \
 )
-
+CHOOSE=${CHOOSE/|*/}
 case $CHOOSE in
-
-    LVDS)
-	xrandr --output LVDS  --mode 1024x768 \
-               --output VGA-0 --off --auto
-	;;
- 
-    home_basis)
-# single screen
-	xrandr --output VGA-0 --mode 1600x1200 --output LVDS --off
-	;;
-
-    home_above)
-# dual screen
-	xrandr --output VGA-0 --above LVDS --mode 1600x1200 --auto
-	;;
-
-    CLONEVGA)
-	xrandr --output LVDS    --mode 1024x768 \
-               --output VGA-0   --mode 1024x768 --auto
-	;;
-
-    VGA)
-	xrandr --output LVDS --off \
-	      --output VGA-0 --auto
-	;;
-
-    VGA_above)
-	xrandr --output VGA-0 --above LVDS --auto;
-	;;
-
-    VGA_left)
-	xrandr --output VGA-0 --left-of LVDS --auto;
-	;;
-
-    VGA_right)
-	xrandr --output VGA-0 --right-of LVDS --auto;
-	;;
-
-    VGA_above)
-	xrandr --output VGA-0 --below LVDS --auto;
-	;;
-
-    VGA_XGA)
-	xrandr --output VGA-0 --mode 1024x768 --auto 
-	;;
-
-    VGA_SVGA)
-	xrandr --output VGA-0 --mode 800x600 --auto 
-	;;
-
-    VGA_VGA)
-	xrandr --output VGA-0 --mode 640x480 --auto 
-	;;
-    
-    VGA_SXGA)
-	xrandr --newmode SXGA 109.00  1280 1368 1496 1712  1024 1027 1034 1063 -hsync +vsync
-	xrandr --addmode VGA-0 SXGA 
-	xrandr --output VGA-0 --above LVDS --mode SXGA --auto
-	;;
-    
-    VGA_UXGA)
-	xrandr --output VGA-0 --above LVDS --mode 1600x1200 --auto
-	;;
+    internal)
+	    ~/.screenlayout/single.sh
+	    ;;
+    wozi_single)
+        ~/.screenlayout/home_wozi_only1440p.sh
+        ;;
+    wozi_dual)
+        ~/.screenlayout/home_wozi_int_plus_one.sh
+        ;;
+    wozi_dual_right)
+        ~/.screenlayout/home_wozi_dual_noint.sh
+        ;;
+    wozi_tripple)
+        ~/.screenlayout/home_wozi_itsa_tripple.sh
+        ;;
+    lager_tripple)
+        ~/.screenlayout/home_labor_tripple.sh
+        ;;
+    lager_double)
+        ~/.screenlayout/labor_double.sh
+        ;;
 esac
