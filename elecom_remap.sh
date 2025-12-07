@@ -38,7 +38,7 @@ if [ -n "${MOUSE_DEV_ID}" ]; then
     xinput set-button-map "${MOUSE_DEV_ID}" 1 2 1 4 5 6 7 12 2 9 8 3
 
     # reduce pointer speed
-    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -0.6
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1
 
     # enable scrolling by pressing btn_forward(9) and moving the ball
     # normal function for btn_forward is not impeded
@@ -80,12 +80,21 @@ if [ -n "${MOUSE_DEV_ID}" ]; then
     echo "ID for ${MOUSE_NAME} in xinput. setting up"
     # reduce pointer speed
     for DEV_ID in ${MOUSE_DEV_ID}; do
-        #xinput set-prop "${DEV_ID}" "libinput Accel Speed" -0.6
         xinput set-prop "${DEV_ID}" "Device Accel Velocity Scaling" 10.0
     done
 fi
 
-# hijack for TPPS/2 Elan TrackPoint
+# the old G502 anounces an additional "Logitech Gaming Mouse G502 Keyboard" input which we need to filter out
+MOUSE_NAME="Logitech Gaming Mouse G502"
+MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" |grep -v Keyboard | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
+
+if [ -n "${MOUSE_DEV_ID}" ]; then
+    echo "found ID for ${MOUSE_NAME} in xinput. setting up"
+    # reduce pointer speed
+    xinput set-prop "${MOUSE_DEV_ID}" "libinput Accel Speed" -1.0
+fi
+
+# hijack for TPPS/2 Elan TrackPoint in Thinkpad T14 gen1 AMD
 MOUSE_NAME="TPPS/2 Elan TrackPoint"
 MOUSE_DEV_ID=$(xinput list |grep "${MOUSE_NAME}" | grep "${MOUSE_TYPE}" | cut -d '=' -f 2 | cut -c 1-2)
 
