@@ -25,4 +25,4 @@ fi
 pactl set-sink-volume $sink "$volume%"
 
 # printing volume slider onto X
-osd_cat -p bottom -A center -o 30 -c green -d 1 -s 1 -f -misc-fixed-*-*-*-*-18-* --barmode=slider --percentage=$volume &
+osd_cat -p bottom -A center -o 30 -c green -d 1 -s 1 -f -misc-fixed-*-*-*-*-14-* --barmode=slider --percentage=$volume &
